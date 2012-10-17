@@ -30,6 +30,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core import cache
 from django.core import exceptions as django_exceptions
 from django_countries.fields import CountryField
+from django.conf.global_settings import LANGUAGES
 from askbot import exceptions as askbot_exceptions
 from askbot import const
 from askbot.const.message_keys import get_i18n_message
@@ -158,6 +159,8 @@ User.add_to_class('website', models.URLField(max_length=200, blank=True))
 User.add_to_class('location', models.CharField(max_length=100, blank=True))
 User.add_to_class('country', CountryField(blank = True))
 User.add_to_class('show_country', models.BooleanField(default = False))
+User.add_to_class('language', models.CharField(max_length=7, choices=LANGUAGES, default='en'))
+
 
 User.add_to_class('date_of_birth', models.DateField(null=True, blank=True))
 User.add_to_class('about', models.TextField(blank=True))

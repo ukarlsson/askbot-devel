@@ -11,6 +11,7 @@ from django.core.urlresolvers import reverse
 from django.utils.hashcompat import md5_constructor
 from django.utils.translation import ugettext as _
 from django.utils.translation import ungettext
+from django.conf.global_settings import LANGUAGES
 
 import askbot
 from askbot.conf import settings as askbot_settings
@@ -498,7 +499,8 @@ class Thread(models.Model):
 
     tags = models.ManyToManyField('Tag', related_name='threads')
     groups = models.ManyToManyField(Group, through=ThreadToGroup, related_name='group_threads')
-
+    language = models.CharField(max_length=7, choices=LANGUAGES, default='en')
+    
     # Denormalised data, transplanted from Question
     tagnames = models.CharField(max_length=125)
     view_count = models.PositiveIntegerField(default=0)
