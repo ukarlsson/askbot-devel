@@ -86,7 +86,8 @@ from askbot.models.signals import user_logged_in, user_registered
 
 def create_authenticated_user_account(
     username=None, email=None, password=None,
-    user_identifier=None, login_provider_name=None
+    user_identifier=None, login_provider_name=None,
+    language=None
 ):
     """creates a user account, user association with
     the login method and the the default email subscriptions
@@ -96,6 +97,9 @@ def create_authenticated_user_account(
     user_registered.send(None, user=user)
 
     logging.debug('creating new openid user association for %s')
+
+    user.language = language
+    user.save()
 
     if password:
         user.set_password(password)
@@ -148,6 +152,8 @@ def login(request, user):
 
     # login and get new session key
     _login(request, user)
+
+    request.session['language'] = user.language
 
     # send signal with old session key as argument
     logging.debug('logged in user %s with session key %s' % (user.username, session_key))
@@ -1091,12 +1097,14 @@ def signup_with_password(request):
             username = form.cleaned_data['username']
             password = form.cleaned_data['password1']
             email = form.cleaned_data['email']
+            language = form.cleaned_data['language']
 
             if askbot_settings.REQUIRE_VALID_EMAIL_FOR == 'nothing':
                 user = create_authenticated_user_account(
                     username=username,
                     email=email,
                     password=password,
+                    language=language
                 )
                 login(request, user)
                 cleanup_post_register_session(request)
@@ -1105,6 +1113,7 @@ def signup_with_password(request):
                 request.session['username'] = username
                 request.session['email'] = email
                 request.session['password'] = password
+                request.session['language'] = language 
                 #todo: generate a key and save it in the session
                 key = util.generate_random_key()
                 email = request.session['email']

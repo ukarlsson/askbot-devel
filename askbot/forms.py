@@ -10,6 +10,7 @@ from django.utils.translation import ungettext_lazy, string_concat
 from django.utils.text import get_text_list
 from django.contrib.auth.models import User
 from django_countries import countries
+from django.conf import settings
 from askbot.utils.forms import NextUrlField, UserNameField
 from askbot.mail import extract_first_email_address
 from askbot.models.tag import get_groups
@@ -321,7 +322,7 @@ class AnswerEditorField(EditorField):
         self.min_length = askbot_settings.MIN_ANSWER_BODY_LENGTH
 
 
-def clean_tag(tag_name):
+def clean_tag(language, tag_name):
     """a function that cleans a single tag name"""
     tag_length = len(tag_name)
     if tag_length > askbot_settings.MAX_TAG_LENGTH:
@@ -348,7 +349,10 @@ def clean_tag(tag_name):
     else:
         try:
             from askbot import models
-            stored_tag = models.Tag.objects.get(name__iexact=tag_name)
+            stored_tag = models.Tag.objects.get(
+                                        language=language,
+                                        name__iexact=tag_name
+                                    )
             return stored_tag.name
         except models.Tag.DoesNotExist:
             return tag_name
@@ -358,6 +362,7 @@ class TagNamesField(forms.CharField):
     """field that receives AskBot tag names"""
 
     def __init__(self, *args, **kwargs):
+        self.language = kwargs.pop('language')
         super(TagNamesField, self).__init__(*args, **kwargs)
         self.required = kwargs.get('required',
                 askbot_settings.TAGS_ARE_REQUIRED)
@@ -412,9 +417,9 @@ class TagNamesField(forms.CharField):
 
         cleaned_entered_tags = list()
         for tag in tag_strings:
-            cleaned_tag = clean_tag(tag)
+            cleaned_tag = clean_tag(self.language, tag)
             if cleaned_tag not in cleaned_entered_tags:
-                cleaned_entered_tags.append(clean_tag(tag))
+                cleaned_entered_tags.append(clean_tag(self.language, tag))
 
         result = u' '.join(cleaned_entered_tags)
 
@@ -881,7 +886,6 @@ class AskForm(PostAsSomeoneForm, PostPrivatelyForm):
     settings forbids anonymous asking
     """
     title = TitleField()
-    tags = TagNamesField()
     wiki = WikiField()
     group_id = forms.IntegerField(required = False, widget = forms.HiddenInput)
     ask_anonymously = forms.BooleanField(
@@ -898,7 +902,9 @@ class AskForm(PostAsSomeoneForm, PostPrivatelyForm):
     )
 
     def __init__(self, *args, **kwargs):
+        language = kwargs.pop('language')
         super(AskForm, self).__init__(*args, **kwargs)
+        self.fields['tags'] = TagNamesField(language=language)
         #it's important that this field is set up dynamically
         self.fields['text'] = QuestionEditorField()
         #hide ask_anonymously field
@@ -1116,11 +1122,11 @@ class CloseForm(forms.Form):
 
 
 class RetagQuestionForm(forms.Form):
-    tags = TagNamesField()
 
     def __init__(self, question, *args, **kwargs):
         """initialize the default values"""
         super(RetagQuestionForm, self).__init__(*args, **kwargs)
+        self.fields['tags'] = TagNamesField(language=question.thread.language)
         self.fields['tags'].initial = question.thread.tagnames
 
 
@@ -1150,9 +1156,20 @@ class RevisionForm(forms.Form):
         self.fields['revision'].choices = rev_choices
         self.fields['revision'].initial = latest_revision.revision
 
+class LanguageForm(forms.Form):
+    language = forms.ChoiceField(widget=forms.Select(attrs={'style': 'width:250px'}))
+
+    def __init__(self, *args, **kwargs):
+        super(LanguageForm, self).__init__(*args, **kwargs)
+        
+        self.fields['language'].choices = getattr(settings, 'LANGUAGES')
+        self.fields['language'].initial = 'en'
+
+    def set_initial_language(self, language):
+        self.fields['language'].initial = language
+
 class EditQuestionForm(PostAsSomeoneForm, PostPrivatelyForm):
     title = TitleField()
-    tags = TagNamesField()
     summary = SummaryField()
     wiki = WikiField()
     reveal_identity = forms.BooleanField(
@@ -1174,6 +1191,7 @@ class EditQuestionForm(PostAsSomeoneForm, PostPrivatelyForm):
         super(EditQuestionForm, self).__init__(*args, **kwargs)
         #it is important to add this field dynamically
         self.fields['text'] = QuestionEditorField()
+        self.fields['tags'] = TagNamesField(language=self.question.thread.language)
         self.fields['title'].initial = revision.title
         self.fields['text'].initial = revision.text
         self.fields['tags'].initial = revision.tagnames
@@ -1337,6 +1355,11 @@ class EditUserForm(forms.Form):
                         label=_('Show tag choices'),
                         required=False
                     )
+    
+    language = forms.ChoiceField(
+                        widget=forms.Select(),
+                        choices = getattr(settings, 'LANGUAGES')
+                    )
 
     birthday = forms.DateField(
                         label=_('Date of birth'),
@@ -1371,6 +1394,7 @@ class EditUserForm(forms.Form):
             country = user.country
         self.fields['country'].initial = country
         self.fields['show_country'].initial = user.show_country
+        self.fields['language'].initial = user.language
         self.fields['show_marked_tags'].initial = user.show_marked_tags
 
         if user.date_of_birth is not None:

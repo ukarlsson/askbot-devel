@@ -457,6 +457,7 @@ def mark_tag(request, **kwargs):#tagging system
     for name in wildcards:
         if name in cleaned_wildcards:
             tag_usage_counts[name] = models.Tag.objects.filter(
+                                        language=request.session['language'],
                                         name__startswith = name[:-1]
                                     ).count()
         else:
@@ -474,7 +475,7 @@ def get_tags_by_wildcard(request):
     if wildcard is None:
         raise Http404
 
-    matching_tags = models.Tag.objects.get_by_wildcards( [wildcard,] )
+    matching_tags = models.Tag.objects.get_by_wildcards( [wildcard,] ).filter(language=request.session['language'])
     count = matching_tags.count()
     names = matching_tags.values_list('name', flat = True)[:20]
     re_data = simplejson.dumps({'tag_count': count, 'tag_names': list(names)})
@@ -534,6 +535,7 @@ def get_tag_list(request):
     function
     """
     tags = models.Tag.objects.filter(
+                        language = request.session['language'],
                         deleted = False,
                         status = models.Tag.STATUS_ACCEPTED
                     )

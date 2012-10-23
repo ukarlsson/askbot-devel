@@ -24,6 +24,7 @@ from django.core.urlresolvers import reverse
 from django.core import exceptions
 from django.conf import settings
 from django.views.decorators import csrf
+from django.utils import translation
 
 from askbot import exceptions as askbot_exceptions
 from askbot import forms
@@ -49,6 +50,20 @@ DEFAULT_PAGE_SIZE = 60
 QUESTIONS_PAGE_SIZE = 10
 # used in answers
 ANSWERS_PAGE_SIZE = 10
+
+@decorators.post_only
+def language(request):
+    form = forms.LanguageForm(request.POST)
+
+    if form.is_valid():
+        print form.cleaned_data
+        language = form.cleaned_data['language']
+        request.session['language'] = language
+        request.session['django_language'] = language
+
+    next = request.REQUEST.get('next', '/')
+    return HttpResponseRedirect(next)
+    
 
 @csrf.csrf_exempt
 def upload(request):#ajax upload file to a question or answer
@@ -211,7 +226,10 @@ def ask(request):#view used to ask a new question
     user can start posting a question anonymously but then
     must login/register in order for the question go be shown
     """
-    form = forms.AskForm(request.REQUEST)
+    form = forms.AskForm(
+                    request.REQUEST,
+                    language=request.session['language']
+                )
     if request.method == 'POST':
         if form.is_valid():
             timestamp = datetime.datetime.now()
@@ -239,7 +257,8 @@ def ask(request):#view used to ask a new question
                         is_anonymous = ask_anonymously,
                         is_private = post_privately,
                         timestamp = timestamp,
-                        group_id = group_id
+                        group_id = group_id,
+                        language = request.session['language']
                     )
                     return HttpResponseRedirect(question.get_absolute_url())
                 except exceptions.PermissionDenied, e:
@@ -264,7 +283,7 @@ def ask(request):#view used to ask a new question
                 return HttpResponseRedirect(url_utils.get_login_url())
 
     if request.method == 'GET':
-        form = forms.AskForm()
+        form = forms.AskForm(language=request.session['language'])
 
     draft_title = ''
     draft_text = ''

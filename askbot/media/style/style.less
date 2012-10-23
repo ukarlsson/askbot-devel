@@ -237,7 +237,7 @@ body.user-messages {
 
 #logo img{
     padding: 5px 0px 5px 0px;
-    height: 75px;
+    height: 47px;
     width: auto;
     float: left;
 }
@@ -251,7 +251,7 @@ body.user-messages {
         text-align: right;
         margin-left: 20px;
         text-decoration: underline;
-        color:#d0e296;
+        color:#101010;
         font-size:16px;
     }
     
@@ -283,7 +283,7 @@ body.user-messages {
     margin-right: 7px;
 
     a {
-        color: #e2e2ae;
+        color: #000000;
         padding: 0px 0px 0px 35px;
         height: 35px;
         line-height: 25px;
@@ -295,13 +295,23 @@ body.user-messages {
         float: left;
     }
 
+    select {
+        border:#d40000 3px solid;
+        margin:5px 0px 0px 10px;
+        display: block;
+        float: right;
+        height: 25px;
+        line-height: 25px;
+        font-size: 14px;
+    }
+
     a:hover {
         text-decoration: underline;
     }
 
     a.on {
         font-weight:bold;
-        color: #FFF;
+        color: #d40000;
         text-decoration: none;
     }
 
@@ -393,11 +403,12 @@ body.user-messages {
 
 #secondaryHeader{ /* Div containing Home button, scope navigation, search form and ask button, check blocks/secondary_header.html */
     height:55px;
-    background:#e9e9e1;
-    border-bottom:#d3d3c2 1px solid;
-    border-top:#fcfcfc 1px solid;
+    border-bottom:#d40000 1px solid;
+    border-top:#d40000 4px solid;
+    .box-shadow(0px,5px,5px,#d40000);
     margin-bottom:10px;
     font-family:@main-font;
+    .linear-gradient(#d2d3d5, #ffffff);
 
     #homeButton{
         border-right:#afaf9e 1px solid;
@@ -423,7 +434,7 @@ body.user-messages {
 
         .scope-selector{
             font-size:20px;
-            color:#7a7a6b;
+            color:#d40000;
             height:55px;
             line-height:55px;
             margin-left:16px
@@ -447,7 +458,7 @@ body.user-messages {
     }
     #validation-code {
         padding-left:5px;
-        border:#cce6ec 3px solid;
+        border:#e0e0e0 3px solid;
         height:25px;
         font-size: 14px;
         width: 200px;
@@ -467,7 +478,7 @@ body.user-messages {
     margin:6px 0px 0px 15px;
 
     .searchInput, .searchInputCancelable{
-        font-size: 26px;
+        font-size: 18px;
         height: 39px;
         line-height: 39px;
         font-weight:300;
@@ -716,7 +727,7 @@ body.anon {
 
     a.followed:hover, a.follow:hover{
         .button-style-hover;
-        .text-shadow(0px, 1px, 0px, #c6d9dd);
+        .text-shadow(0px, 1px, 0px, #d40000);
     }
 
     a.followed div.unfollow{
@@ -810,14 +821,14 @@ body.anon {
 /* ----- Sorting top Tab, check main_page/tab_bar.html ------*/
 
 .tabBar {
-    background-color: #eff5f6;
+    .linear-gradient(#d2d3d5, #ffffff);
     height: 30px;
     margin-bottom: 3px;
     margin-top: 3px;
     float:right;
     font-family:@sort-font;
     font-size:16px;
-    .rounded-corners(5px);
+    .rounded-corners(2px);
 }
 
 .tabBar h2 {
@@ -1270,7 +1281,7 @@ ul#related-tags li {
 }
 
 .tag-right {
-    background: #f3f6f6;
+    background: #f6f6f6;
     border:#fff 1px solid ;
     border-top:#fff 2px solid;
     outline:#cfdbdb 1px solid;
@@ -1440,7 +1451,7 @@ ul#related-tags li {
         line-height: 36px;
         margin: 0px;
         padding: 0px 0 0 5px;
-        border:#cce6ec 3px solid;
+        border:#e0e0e0 3px solid;
         width:719px;
     }
 }
@@ -1485,7 +1496,7 @@ ul#related-tags li {
     }
 
     #id_tags {
-        border:#cce6ec 3px solid;
+        border:#e0e0e0 3px solid;
         height:25px;
         padding-left:5px;
         font-size:14px;
@@ -1499,7 +1510,7 @@ ul#related-tags li {
 .edit-answer-page {
     #id_post_author_username,
     #id_post_author_email {
-        border: #cce6ec 3px solid;
+        border: #e0e0e0 3px solid;
         height: 25px;
         line-height: 25px;
         padding-left: 5px;
@@ -1556,7 +1567,7 @@ ul#related-tags li {
 
 #id_user,
 #id_user_author {
-    border:#cce6ec 3px solid;
+    border:#e0e0e0 3px solid;
     height:25px;
     padding-left:5px;
     width:395px;
@@ -1594,7 +1605,7 @@ ul#related-tags li {
 
 #id_user,
 #id_user_author {
-    border:#cce6ec 3px solid;
+    border:#e0e0e0 3px solid;
     height:25px;
     padding-left:5px;
     width:395px;
@@ -1629,11 +1640,11 @@ ul#related-tags li {
 .ask-page input.submit:hover,
 .edit-question-page input.submit:hover{
     .button-style-hover;
-    .text-shadow(0px, 1px, 0px, #c6d9dd)
+    .text-shadow(0px, 1px, 0px, #d40000)
 }
 
 .wmd-container {
-    border:#cce6ec 3px solid;
+    border:#e0e0e0 3px solid;
     min-height: 250px;
     textarea {
         border: none;
@@ -1784,12 +1795,12 @@ ul#related-tags li {
         height: 36px;
         margin: 0px;
         padding: 0px 0 0 5px;
-        border:#cce6ec 3px solid;
+        border:#e0e0e0 3px solid;
         width: 719px;
         margin-bottom:10px;
     }
     #id_summary{
-        border:#cce6ec 3px solid;
+        border:#e0e0e0 3px solid;
         height:25px;
         padding-left:5px;
         width:395px;
@@ -2135,7 +2146,7 @@ ul#related-tags li {
             line-height: 140%;
             padding-left:2px;
             padding-top:3px;
-            border:#cce6ec 3px solid;
+            border:#e0e0e0 3px solid;
         }
         
         input {
@@ -2505,7 +2516,7 @@ ul#related-tags li {
         margin-bottom:15px;
     }
     input[type="text"],input[type="password"],select{
-        border:#cce6ec 3px solid;
+        border:#d40000 3px solid;
         height:25px;
         line-height: 25px;
         padding-left:5px;
@@ -2517,7 +2528,7 @@ ul#related-tags li {
         height:30px;
     }
     textarea{
-        border:#cce6ec 3px solid;
+        border:#e0e0e0 3px solid;
         padding-left:5px;
         padding-top:5px;
         width:395px;
@@ -2574,7 +2585,7 @@ ul#related-tags li {
         height: 20px;
         margin: 0px;
         padding: 0px 0 0 5px;
-        border:#cce6ec 3px solid;
+        border:#e0e0e0 3px solid;
         width:200px;
     }
     .submit-b{

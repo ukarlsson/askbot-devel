@@ -10,6 +10,7 @@ from jinja2.exceptions import TemplateNotFound
 from jinja2.utils import open_if_exists
 from askbot.conf import settings as askbot_settings
 from askbot.skins import utils
+from askbot import forms
 
 from coffin import template
 template.add_to_builtins('askbot.templatetags.extra_filters_jinja')
@@ -116,6 +117,11 @@ def get_template(template, request = None):
     return skin.get_template(template)
 
 def render_into_skin_as_string(template, data, request):
+    form = forms.LanguageForm()
+    if request.session.has_key('language'):
+        form.set_initial_language(request.session['language'])
+    data['language_form'] = form
+    data['current_path'] = request.get_full_path()
     context = RequestContext(request, data)
     template = get_template(template, request)
     return template.render(context)

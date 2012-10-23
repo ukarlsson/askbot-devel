@@ -30,11 +30,14 @@ def delete_tags(tags):
     tag_ids = [tag.id for tag in tags]
     Tag.objects.filter(id__in = tag_ids).delete()
 
-def get_tags_by_names(tag_names):
+def get_tags_by_names(language, tag_names):
     """returns query set of tags
     and a set of tag names that were not found
     """
-    tags = Tag.objects.filter(name__in = tag_names)
+    tags = Tag.objects.filter(
+                        language = language,
+                        name__in = tag_names
+                    )
     #if there are brand new tags, create them
     #and finalize the added tag list
     if tags.count() < len(tag_names):
@@ -173,9 +176,9 @@ class TagQuerySet(models.query.QuerySet):
             tag_filter |= models.Q(name__startswith = next_tag[:-1])
         return self.filter(tag_filter)
 
-    def get_related_to_search(self, threads, ignored_tag_names):
+    def get_related_to_search(self, language, threads, ignored_tag_names):
         """Returns at least tag names, along with use counts"""
-        tags = self.filter(threads__in=threads).annotate(local_used_count=models.Count('id')).order_by('-local_used_count', 'name')
+        tags = self.filter(language=language, threads__in=threads).annotate(local_used_count=models.Count('id')).order_by('-local_used_count', 'name')
         if ignored_tag_names:
             tags = tags.exclude(name__in=ignored_tag_names)
         tags = tags.exclude(deleted = True)
@@ -235,7 +238,7 @@ class TagManager(BaseQuerySetManager):
         ) % ', '.join(tag_names)
         user.message_set.create(message = msg)
 
-    def create_in_bulk(self, tag_names = None, user = None):
+    def create_in_bulk(self, language, tag_names = None, user = None):
         """creates tags by names. If user can create tags,
         then they are set status ``STATUS_ACCEPTED``,
         otherwise the status will be set to ``STATUS_SUGGESTED``.
@@ -247,7 +250,9 @@ class TagManager(BaseQuerySetManager):
 
         #load suggested tags
         pre_suggested_tags = self.filter(
-            name__in = tag_names, status = Tag.STATUS_SUGGESTED
+            language = language,
+            name__in = tag_names,
+            status = Tag.STATUS_SUGGESTED
         )
 
         #deal with suggested tags
@@ -269,7 +274,11 @@ class TagManager(BaseQuerySetManager):
 
         for tag_name in set(tag_names) - set(pre_suggested_tag_names):
             #status for the new tags is automatically set within the create()
-            new_tag = Tag.objects.create(name = tag_name, created_by = user)
+            new_tag = Tag.objects.create(
+                                name = tag_name,
+                                language = language,
+                                created_by = user
+                            )
             created_tags.append(new_tag)
 
             if new_tag.status == Tag.STATUS_SUGGESTED:
@@ -288,13 +297,14 @@ class Tag(models.Model):
     STATUS_SUGGESTED = 0
     STATUS_ACCEPTED = 1
 
-    name = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255)
     language = models.CharField(max_length=7, choices=LANGUAGES, default='en')
     created_by = models.ForeignKey(User, related_name='created_tags')
 
     suggested_by = models.ManyToManyField(
         User, related_name='suggested_tags',
-        help_text = 'Works only for suggested tags for tag moderation'
+        help_text = 'Works only for suggested tags for tag moderation',
+        blank = True
     )
 
     status = models.SmallIntegerField(default = STATUS_ACCEPTED)
@@ -309,7 +319,8 @@ class Tag(models.Model):
     tag_wiki = models.OneToOneField(
                                 'Post',
                                 null=True,
-                                related_name = 'described_tag'
+                                related_name = 'described_tag',
+                                blank=True,
                             )
 
     objects = TagManager()

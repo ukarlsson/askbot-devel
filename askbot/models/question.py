@@ -98,7 +98,8 @@ class ThreadManager(BaseQuerySetManager):
                 is_private = False,
                 group_id = None,
                 by_email = False,
-                email_address = None
+                email_address = None,
+                language = 'en'
             ):
         """creates new thread"""
         # TODO: Some of this code will go to Post.objects.create_new
@@ -110,7 +111,8 @@ class ThreadManager(BaseQuerySetManager):
             title=title,
             tagnames=tagnames,
             last_activity_at=added_at,
-            last_activity_by=author
+            last_activity_by=author,
+            language=language
         )
 
         #todo: code below looks like ``Post.objects.create_new()``
@@ -231,6 +233,8 @@ class ThreadManager(BaseQuerySetManager):
             #get group names
             qs = qs.get_visible(user=request_user)
 
+        if search_state.language:
+            qs = qs.filter(language = search_state.language)
 
         #run text search while excluding any modifier in the search string
         #like #tag [title: something] @user
@@ -497,19 +501,19 @@ class Thread(models.Model):
 
     title = models.CharField(max_length=300)
 
-    tags = models.ManyToManyField('Tag', related_name='threads')
+    tags = models.ManyToManyField('Tag', related_name='threads', blank=True)
     groups = models.ManyToManyField(Group, through=ThreadToGroup, related_name='group_threads')
     language = models.CharField(max_length=7, choices=LANGUAGES, default='en')
     
     # Denormalised data, transplanted from Question
-    tagnames = models.CharField(max_length=125)
+    tagnames = models.CharField(max_length=125, blank=True)
     view_count = models.PositiveIntegerField(default=0)
     favourite_count = models.PositiveIntegerField(default=0)
     answer_count = models.PositiveIntegerField(default=0)
     last_activity_at = models.DateTimeField(default=datetime.datetime.now)
     last_activity_by = models.ForeignKey(User, related_name='unused_last_active_in_threads')
 
-    followed_by     = models.ManyToManyField(User, related_name='followed_threads')
+    followed_by     = models.ManyToManyField(User, related_name='followed_threads', blank=True)
     favorited_by    = models.ManyToManyField(User, through='FavoriteQuestion', related_name='unused_favorite_threads')
 
     closed          = models.BooleanField(default=False)
@@ -1172,12 +1176,16 @@ class Thread(models.Model):
 
         if added_tagnames:
             #find reused tags
-            reused_tags, new_tagnames = get_tags_by_names(added_tagnames)
+            reused_tags, new_tagnames = get_tags_by_names(
+                                                self.language,
+                                                added_tagnames
+                                            )
             reused_tags.mark_undeleted()
 
             added_tags = list(reused_tags)
             #tag moderation is in the call below
             created_tags = Tag.objects.create_in_bulk(
+                                        language=self.language,
                                         tag_names=new_tagnames,
                                         user=user
                                     )
@@ -1251,6 +1259,9 @@ class Thread(models.Model):
             tagnames = ' '.join(tag_names),
             silent = silent
         )
+
+    def __unicode__(self):
+        return self.title
 
     def retag(self, retagged_by=None, retagged_at=None, tagnames=None, silent=False):
         """changes thread tags"""

@@ -76,7 +76,10 @@ def questions(request, **kwargs):
     if request.method != 'GET':
         return HttpResponseNotAllowed(['GET'])
 
+    print request.LANGUAGE_CODE
+
     search_state = SearchState(
+                    language=request.session.get('language'),
                     user_logged_in=request.user.is_authenticated(),
                     **kwargs
                 )
@@ -99,6 +102,7 @@ def questions(request, **kwargs):
     models.Thread.objects.precache_view_data_hack(threads=page.object_list)
 
     related_tags = Tag.objects.get_related_to_search(
+                        language=request.session.get('language'),
                         threads=page.object_list,
                         ignored_tag_names=meta_data.get('ignored_tag_names',[])
                     )
@@ -233,6 +237,8 @@ def tags(request):#view showing a listing of available tags - plain list
 
     tag_list_type = askbot_settings.TAG_LIST_FORMAT
 
+    tags_set = models.Tag.objects.all().filter(language=request.session['language'])
+
     if tag_list_type == 'list':
 
         stag = ""
@@ -246,7 +252,7 @@ def tags(request):#view showing a listing of available tags - plain list
         stag = request.GET.get("query", "").strip()
         if stag != '':
             objects_list = Paginator(
-                            models.Tag.objects.filter(
+                            tags_set.filter(
                                                 deleted=False,
                                                 name__icontains=stag
                                             ).exclude(
@@ -256,9 +262,9 @@ def tags(request):#view showing a listing of available tags - plain list
                         )
         else:
             if sortby == "name":
-                objects_list = Paginator(models.Tag.objects.all().filter(deleted=False).exclude(used_count=0).order_by("name"), DEFAULT_PAGE_SIZE)
+                objects_list = Paginator(tags_set.filter(deleted=False).exclude(used_count=0).order_by("name"), DEFAULT_PAGE_SIZE)
             else:
-                objects_list = Paginator(models.Tag.objects.all().filter(deleted=False).exclude(used_count=0).order_by("-used_count"), DEFAULT_PAGE_SIZE)
+                objects_list = Paginator(tags_set.filter(deleted=False).exclude(used_count=0).order_by("-used_count"), DEFAULT_PAGE_SIZE)
 
         try:
             tags = objects_list.page(page)
@@ -295,12 +301,12 @@ def tags(request):#view showing a listing of available tags - plain list
         if request.method == "GET":
             stag = request.GET.get("query", "").strip()
             if stag != '':
-                tags = models.Tag.objects.filter(deleted=False, name__icontains=stag).exclude(used_count=0)
+                tags = tags_set.filter(deleted=False, name__icontains=stag).exclude(used_count=0)
             else:
                 if sortby == "name":
-                    tags = models.Tag.objects.all().filter(deleted=False).exclude(used_count=0).order_by("name")
+                    tags = tags_set.filter(deleted=False).exclude(used_count=0).order_by("name")
                 else:
-                    tags = models.Tag.objects.all().filter(deleted=False).exclude(used_count=0).order_by("-used_count")
+                    tags = tags_set.filter(deleted=False).exclude(used_count=0).order_by("-used_count")
 
         font_size = extra_tags.get_tag_font_size(tags)
 

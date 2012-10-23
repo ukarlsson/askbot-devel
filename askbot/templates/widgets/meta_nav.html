@@ -1,4 +1,7 @@
 {% import "macros.html" as macros%}
+<form id="fmlang" action="{% url language %}" method="post" >{% csrf_token %}
+<input name="next" type="hidden" value="{{ current_path }}" />
+{{ language_form.language }}
 <a 
   id="navTags"
   href="{% url tags %}"
@@ -26,3 +29,4 @@
   {% if active_tab == 'badges' %}class="on"{% endif %}
 >{% trans %}badges{% endtrans %}</a>
 {% endif %}
+</form>

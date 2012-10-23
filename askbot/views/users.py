@@ -339,6 +339,7 @@ def edit_user(request, id):
             user.country = form.cleaned_data['country']
             user.show_country = form.cleaned_data['show_country']
             user.show_marked_tags = form.cleaned_data['show_marked_tags']
+            user.language = form.cleaned_data['language']
             user.save()
             # send user updated signal if full fields have been updated
             award_badges_signal.send(None,
@@ -417,7 +418,8 @@ def user_stats(request, user, context):
     # INFO: There's bug in Django that makes the following query kind of broken (GROUP BY clause is problematic):
     #       http://stackoverflow.com/questions/7973461/django-aggregation-does-excessive-group-by-clauses
     #       Fortunately it looks like it returns correct results for the test data
-    user_tags = models.Tag.objects.filter(threads__posts__author=user).distinct().\
+    user_tags = models.Tag.objects.filter(threads__posts__author=user,
+                                          language=request.session['language']).distinct().\
                     annotate(user_tag_usage_count=Count('threads')).\
                     order_by('-user_tag_usage_count')[:const.USER_VIEW_DATA_SIZE]
     user_tags = list(user_tags) # evaluate
@@ -1056,6 +1058,7 @@ def user(request, id, slug=None, tab_name=None):
         author=profile_owner.id,
         page=None,
         user_logged_in=profile_owner.is_authenticated(),
+        language=profile_owner.language,
     )
 
     context = {

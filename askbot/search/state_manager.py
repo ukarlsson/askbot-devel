@@ -85,15 +85,18 @@ class SearchState(object):
 
     @classmethod
     def get_empty(cls):
-        return cls(scope=None, sort=None, query=None, tags=None, author=None, page=None, user_logged_in=None)
+        return cls(scope=None, sort=None, query=None, tags=None, author=None, page=None, user_logged_in=None, language=None)
 
-    def __init__(self, scope, sort, query, tags, author, page, user_logged_in):
+    def __init__(self, scope, sort, query, tags, author, page, user_logged_in,
+        language):
         # INFO: zip(*[('a', 1), ('b', 2)])[0] == ('a', 'b')
-
+        
         if (scope not in zip(*const.POST_SCOPE_LIST)[0]) or (scope == 'favorite' and not user_logged_in):
             self.scope = const.DEFAULT_POST_SCOPE
         else:
             self.scope = scope
+
+        self.language = language
 
         self.query = query.strip() if query else None
 

@@ -318,7 +318,16 @@ class ClassicRegisterForm(SetPasswordForm):
     username = UserNameField(widget_attrs={'tabindex': 0})
     email = UserEmailField()
     login_provider = PasswordLoginProviderField()
+    language = forms.ChoiceField(
+                    widget=forms.Select(attrs={'class': 'required login'}),
+                    choices = getattr(settings, 'LANGUAGES')
+    )
     #fields password1 and password2 are inherited
+
+    def __init__(self, *args, **kwargs):
+        super(SetPasswordForm, self).__init__(*args, **kwargs)
+        
+        self.fields['language'].initial = 'en'
 
 class SafeClassicRegisterForm(ClassicRegisterForm):
     """this form uses recaptcha in addition

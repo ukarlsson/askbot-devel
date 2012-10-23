@@ -70,6 +70,12 @@ urlpatterns = patterns('',
         views.readers.questions,
         name='questions'
     ),
+
+    url(
+        r'^language/',
+        views.writers.language,
+        name='language'
+    ),
     # END main page urls
 
     url(

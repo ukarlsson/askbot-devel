@@ -70,6 +70,9 @@
         group_dropdown.enableAddGroups();
         {%endif%}
         {% endif %}
+        $('#id_language').unbind().change(function(){
+            $('#fmlang').submit();
+        });
     });
 {% if user_messages %}
     $('#validate_email_alert').click(function(){notify.close(true)})

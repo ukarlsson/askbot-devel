@@ -1568,7 +1568,8 @@ def user_post_question(
                     group_id = None,
                     timestamp = None,
                     by_email = False,
-                    email_address = None
+                    email_address = None,
+                    language = None,
                 ):
     """makes an assertion whether user can post the question
     then posts it and returns the question object"""
@@ -1598,7 +1599,8 @@ def user_post_question(
                                     is_private = is_private,
                                     group_id = group_id,
                                     by_email = by_email,
-                                    email_address = email_address
+                                    email_address = email_address,
+                                    language = language 
                                 )
     question = thread._question_post()
     if question.author != self:
