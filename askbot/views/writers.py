@@ -56,7 +56,6 @@ def language(request):
     form = forms.LanguageForm(request.POST)
 
     if form.is_valid():
-        print form.cleaned_data
         language = form.cleaned_data['language']
         request.session['language'] = language
         request.session['django_language'] = language

@@ -76,8 +76,6 @@ def questions(request, **kwargs):
     if request.method != 'GET':
         return HttpResponseNotAllowed(['GET'])
 
-    print request.LANGUAGE_CODE
-
     search_state = SearchState(
                     language=request.session.get('language'),
                     user_logged_in=request.user.is_authenticated(),
