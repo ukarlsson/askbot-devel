@@ -445,7 +445,8 @@ def edit_question(request, id):
                             tags = form.cleaned_data['tags'],
                             wiki = is_wiki,
                             edit_anonymously = is_anon_edit,
-                            is_private = post_privately
+                            is_private = post_privately,
+                            language = form.cleaned_data['language']
                         )
                     return HttpResponseRedirect(question.get_absolute_url())
         else:

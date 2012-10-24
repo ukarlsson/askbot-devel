@@ -1693,7 +1693,8 @@ def user_edit_question(
                 is_private = False,
                 timestamp = None,
                 force = False,#if True - bypass the assert
-                by_email = False
+                by_email = False,
+                language = None,
             ):
     if force == False:
         self.assert_can_edit_question(question)
@@ -1709,7 +1710,8 @@ def user_edit_question(
         wiki = wiki,
         edit_anonymously = edit_anonymously,
         is_private = is_private,
-        by_email = by_email
+        by_email = by_email,
+        language = language
     )
 
     question.thread.invalidate_cached_data()

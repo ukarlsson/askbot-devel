@@ -17,6 +17,9 @@
                                         value="false">
     </div> 
     {% set use_category_selector = (settings.TAG_SOURCE == 'category-tree') %}
+    <div class="form-item">
+        {{ form.language }} {{ form.language.errors }}
+    </div>
     {{
         macros.edit_post(
                     form,

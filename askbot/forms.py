@@ -1157,18 +1157,24 @@ class RevisionForm(forms.Form):
         self.fields['revision'].initial = latest_revision.revision
 
 class LanguageForm(forms.Form):
-    language = forms.ChoiceField(widget=forms.Select(attrs={'style': 'width:250px'}))
+    language = forms.ChoiceField(
+                        widget=forms.Select(attrs={'style': 'width:250px'}),
+                        choices=getattr(settings, 'LANGUAGES')
+                    )
 
     def __init__(self, *args, **kwargs):
         super(LanguageForm, self).__init__(*args, **kwargs)
-        
-        self.fields['language'].choices = getattr(settings, 'LANGUAGES')
         self.fields['language'].initial = 'en'
 
     def set_initial_language(self, language):
         self.fields['language'].initial = language
 
 class EditQuestionForm(PostAsSomeoneForm, PostPrivatelyForm):
+    language = forms.ChoiceField(
+                        widget=forms.Select(attrs={'style': 'width:250px'}),
+                        choices=getattr(settings, 'LANGUAGES')
+                    )
+
     title = TitleField()
     summary = SummaryField()
     wiki = WikiField()
@@ -1196,6 +1202,7 @@ class EditQuestionForm(PostAsSomeoneForm, PostPrivatelyForm):
         self.fields['text'].initial = revision.text
         self.fields['tags'].initial = revision.tagnames
         self.fields['wiki'].initial = self.question.wiki
+        self.fields['language'].initial = self.question.thread.language
         #hide the reveal identity field
         if not self.can_stay_anonymous():
             self.hide_field('reveal_identity')

@@ -32,6 +32,7 @@ from askbot.models.user import GroupMembership
 from askbot.models.tag import Tag, MarkedTag
 from askbot.models.tag import get_groups, tags_match_some_wildcard
 from askbot.models.tag import get_global_group
+from askbot.models.tag import delete_tags, separate_unused_tags
 from askbot.conf import settings as askbot_settings
 from askbot import exceptions
 from askbot.utils import markup
@@ -1698,7 +1699,7 @@ class Post(models.Model):
     def _question__apply_edit(self, edited_at=None, edited_by=None, title=None,\
                               text=None, comment=None, tags=None, wiki=False,\
                               edit_anonymously = False, is_private = False,
-                              by_email = False
+                              by_email = False, language=None
                             ):
 
         #todo: the thread editing should happen outside of this
@@ -1713,8 +1714,19 @@ class Post(models.Model):
         if edited_at is None:
             edited_at = datetime.datetime.now()
 
-        # Update the Question tag associations
-        if latest_revision.tagnames != tags:
+        if language is None:
+            language = self.thread.language
+        elif language != self.thread.language:
+            remove_tags = self.thread.tags.all()
+            for tag in remove_tags:
+                tag.used_count -= 1
+            delete_tags(separate_unused_tags(remove_tags)[1])
+            self.thread.tags.clear()
+            self.thread.language = language
+            self.thread.update_tags(
+                tagnames = tags, user = edited_by, timestamp = edited_at
+            )
+        elif latest_revision.tagnames != tags:
             self.thread.update_tags(
                 tagnames = tags, user = edited_by, timestamp = edited_at
             )
