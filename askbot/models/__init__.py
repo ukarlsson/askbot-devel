@@ -190,6 +190,11 @@ User.add_to_class('new_response_count', models.IntegerField(default=0))
 User.add_to_class('seen_response_count', models.IntegerField(default=0))
 User.add_to_class('consecutive_days_visit_count', models.IntegerField(default = 0))
 
+User.add_to_class('equa_id', models.IntegerField(default=-1))
+
+User._meta.get_field('username')._unique = False
+User._meta.get_field('email')._unique = True
+
 GRAVATAR_TEMPLATE = "http://www.gravatar.com/avatar/%(gravatar)s?" + \
     "s=%(size)d&amp;d=%(type)s&amp;r=PG"
 
@@ -1569,7 +1574,7 @@ def user_post_question(
                     timestamp = None,
                     by_email = False,
                     email_address = None,
-                    language = None,
+                    language = 'en',
                 ):
     """makes an assertion whether user can post the question
     then posts it and returns the question object"""

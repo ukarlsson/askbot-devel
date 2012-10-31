@@ -12,6 +12,7 @@ from django.utils.hashcompat import md5_constructor
 from django.utils.translation import ugettext as _
 from django.utils.translation import ungettext
 from django.conf.global_settings import LANGUAGES
+from django.db.models import Q
 
 import askbot
 from askbot.conf import settings as askbot_settings
@@ -278,7 +279,10 @@ class ThreadManager(BaseQuerySetManager):
                 #only one or two search tags anyway
                 for tag in tags:
                     try:
-                        tag_record = Tag.objects.get(name__iexact=tag)
+                        tag_record = Tag.objects.get(
+                                    Q(language=search_state.language) | Q(language=''),
+                                    name__iexact=tag
+                                )
                         existing_tags.add(tag_record.name)
                     except Tag.DoesNotExist:
                         non_existing_tags.add(tag)

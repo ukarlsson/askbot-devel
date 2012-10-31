@@ -29,6 +29,9 @@ sitemaps = {
 
 APP_PATH = os.path.dirname(__file__)
 urlpatterns = patterns('',
+    url(r'^ida_login/equa_id:(?P<equa_id>\d+)/password:(?P<password>[^/]+)/$',
+        views.auth.ida_login
+    ),
     url(r'^$', views.readers.index, name='index'),
     url(
         r'^sitemap.xml$',
@@ -540,6 +543,11 @@ else:
 if 'askbot.deps.django_authopenid' in settings.INSTALLED_APPS:
     urlpatterns += (
         url(r'^%s' % _('account/'), include('askbot.deps.django_authopenid.urls')),
+    )
+
+if 'rosetta' in settings.INSTALLED_APPS:
+    urlpatterns += patterns('',
+        url(r'^rosetta/', include('rosetta.urls')),
     )
 
 if 'avatar' in settings.INSTALLED_APPS:

@@ -1720,6 +1720,7 @@ class Post(models.Model):
             remove_tags = self.thread.tags.all()
             for tag in remove_tags:
                 tag.used_count -= 1
+                tag.save()
             delete_tags(separate_unused_tags(remove_tags)[1])
             self.thread.tags.clear()
             self.thread.language = language

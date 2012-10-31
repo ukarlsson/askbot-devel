@@ -25,6 +25,7 @@ from django.utils import simplejson
 from django.utils.html import escape
 from django.utils.translation import ugettext as _
 from django.utils.translation import string_concat
+from django.db.models import Q
 from askbot.utils.slug import slugify
 from askbot import models
 from askbot import forms
@@ -457,9 +458,9 @@ def mark_tag(request, **kwargs):#tagging system
     for name in wildcards:
         if name in cleaned_wildcards:
             tag_usage_counts[name] = models.Tag.objects.filter(
-                                        language=request.session['language'],
-                                        name__startswith = name[:-1]
-                                    ).count()
+                    Q(language=request.session['language']) | Q(language=''),
+                    name__startswith = name[:-1]
+                ).count()
         else:
             tag_usage_counts[name] = 0
 
@@ -475,7 +476,7 @@ def get_tags_by_wildcard(request):
     if wildcard is None:
         raise Http404
 
-    matching_tags = models.Tag.objects.get_by_wildcards( [wildcard,] ).filter(language=request.session['language'])
+    matching_tags = models.Tag.objects.get_by_wildcards( [wildcard,] ).filter(Q(language=request.session['language']) | Q(language=''))
     count = matching_tags.count()
     names = matching_tags.values_list('name', flat = True)[:20]
     re_data = simplejson.dumps({'tag_count': count, 'tag_names': list(names)})
@@ -535,10 +536,10 @@ def get_tag_list(request):
     function
     """
     tags = models.Tag.objects.filter(
-                        language = request.session['language'],
-                        deleted = False,
-                        status = models.Tag.STATUS_ACCEPTED
-                    )
+                Q(language = request.session['language']) | Q(language = ''),
+                deleted = False,
+                status = models.Tag.STATUS_ACCEPTED
+            )
 
     tag_names = tags.values_list(
                         'name', flat = True

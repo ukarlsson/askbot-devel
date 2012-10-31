@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
 from django.conf import settings
 from django.conf.global_settings import LANGUAGES
+from django.db.models import Q
 from askbot.models.base import BaseQuerySetManager
 from askbot import const
 from askbot.conf import settings as askbot_settings
@@ -27,7 +28,7 @@ def get_global_group():
 
 def delete_tags(tags):
     """deletes tags in the list"""
-    tag_ids = [tag.id for tag in tags]
+    tag_ids = [tag.id for tag in filter(lambda tag:not tag.persistent, tags)]
     Tag.objects.filter(id__in = tag_ids).delete()
 
 def get_tags_by_names(language, tag_names):
@@ -35,7 +36,7 @@ def get_tags_by_names(language, tag_names):
     and a set of tag names that were not found
     """
     tags = Tag.objects.filter(
-                        language = language,
+                        Q(language=language) | Q(language=''),
                         name__in = tag_names
                     )
     #if there are brand new tags, create them
@@ -131,7 +132,7 @@ def get_mandatory_tags():
 
 class TagQuerySet(models.query.QuerySet):
     def get_valid_tags(self, page_size):
-        tags = self.all().filter(deleted=False).exclude(used_count=0).order_by("-id")[:page_size]
+        tags = self.all().filter(deleted=False).exclude(used_count=0, persistent=False).order_by("-id")[:page_size]
         return tags
 
     def update_use_counts(self, tags):
@@ -178,7 +179,7 @@ class TagQuerySet(models.query.QuerySet):
 
     def get_related_to_search(self, language, threads, ignored_tag_names):
         """Returns at least tag names, along with use counts"""
-        tags = self.filter(language=language, threads__in=threads).annotate(local_used_count=models.Count('id')).order_by('-local_used_count', 'name')
+        tags = self.filter(Q(language=language) | Q(language=''), threads__in=threads).annotate(local_used_count=models.Count('id')).order_by('-local_used_count', 'name')
         if ignored_tag_names:
             tags = tags.exclude(name__in=ignored_tag_names)
         tags = tags.exclude(deleted = True)
@@ -250,7 +251,7 @@ class TagManager(BaseQuerySetManager):
 
         #load suggested tags
         pre_suggested_tags = self.filter(
-            language = language,
+            Q(language=language) | Q(language=''),
             name__in = tag_names,
             status = Tag.STATUS_SUGGESTED
         )
@@ -298,7 +299,7 @@ class Tag(models.Model):
     STATUS_ACCEPTED = 1
 
     name = models.CharField(max_length=255)
-    language = models.CharField(max_length=7, choices=LANGUAGES, default='en')
+    language = models.CharField(max_length=7, choices=LANGUAGES, blank=True)
     created_by = models.ForeignKey(User, related_name='created_tags')
 
     suggested_by = models.ManyToManyField(
@@ -308,6 +309,8 @@ class Tag(models.Model):
     )
 
     status = models.SmallIntegerField(default = STATUS_ACCEPTED)
+
+    persistent  = models.BooleanField(default=False)
 
     # Denormalised data
     used_count = models.PositiveIntegerField(default=0)

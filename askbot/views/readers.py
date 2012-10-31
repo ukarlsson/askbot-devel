@@ -25,6 +25,7 @@ from django.core import exceptions as django_exceptions
 from django.contrib.humanize.templatetags import humanize
 from django.http import QueryDict
 from django.conf import settings
+from django.db.models import Q
 
 import askbot
 from askbot import exceptions
@@ -82,6 +83,7 @@ def questions(request, **kwargs):
                     **kwargs
                 )
     page_size = int(askbot_settings.DEFAULT_QUESTIONS_PAGE_SIZE)
+
 
     qs, meta_data = models.Thread.objects.run_advanced_search(
                         request_user=request.user, search_state=search_state
@@ -235,7 +237,9 @@ def tags(request):#view showing a listing of available tags - plain list
 
     tag_list_type = askbot_settings.TAG_LIST_FORMAT
 
-    tags_set = models.Tag.objects.all().filter(language=request.session['language'])
+    tags_set = models.Tag.objects.all().filter(
+                    Q(language=request.session['language']) | Q(language='')
+                )
 
     if tag_list_type == 'list':
 
@@ -254,15 +258,16 @@ def tags(request):#view showing a listing of available tags - plain list
                                                 deleted=False,
                                                 name__icontains=stag
                                             ).exclude(
-                                                used_count=0
+                                                used_count=0,
+                                                persistent=False
                                             ),
                             DEFAULT_PAGE_SIZE
                         )
         else:
             if sortby == "name":
-                objects_list = Paginator(tags_set.filter(deleted=False).exclude(used_count=0).order_by("name"), DEFAULT_PAGE_SIZE)
+                objects_list = Paginator(tags_set.filter(deleted=False).exclude(used_count=0, persistent=False).order_by("name"), DEFAULT_PAGE_SIZE)
             else:
-                objects_list = Paginator(tags_set.filter(deleted=False).exclude(used_count=0).order_by("-used_count"), DEFAULT_PAGE_SIZE)
+                objects_list = Paginator(tags_set.filter(deleted=False).exclude(used_count=0, persistent=False).order_by("-used_count"), DEFAULT_PAGE_SIZE)
 
         try:
             tags = objects_list.page(page)
@@ -299,12 +304,12 @@ def tags(request):#view showing a listing of available tags - plain list
         if request.method == "GET":
             stag = request.GET.get("query", "").strip()
             if stag != '':
-                tags = tags_set.filter(deleted=False, name__icontains=stag).exclude(used_count=0)
+                tags = tags_set.filter(deleted=False, name__icontains=stag).exclude(used_count=0, persistent=False)
             else:
                 if sortby == "name":
-                    tags = tags_set.filter(deleted=False).exclude(used_count=0).order_by("name")
+                    tags = tags_set.filter(deleted=False).exclude(used_count=0, persistent=False).order_by("name")
                 else:
-                    tags = tags_set.filter(deleted=False).exclude(used_count=0).order_by("-used_count")
+                    tags = tags_set.filter(deleted=False).exclude(used_count=0, persistent=False).order_by("-used_count")
 
         font_size = extra_tags.get_tag_font_size(tags)
 
