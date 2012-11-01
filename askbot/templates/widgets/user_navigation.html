@@ -13,10 +13,10 @@
         }})
     {%- endif -%}
     </span>
-    {% if settings.USE_ASKBOT_LOGIN_SYSTEM %}
+    {% if settings.USE_ASKBOT_LOGIN_SYSTEM or 1 %}
          <a href="{{ settings.LOGOUT_URL }}?next={{ settings.LOGOUT_REDIRECT_URL }}">{% trans %}sign out{% endtrans %}</a>
     {% endif %}
-{% elif settings.USE_ASKBOT_LOGIN_SYSTEM %}
+{% elif settings.USE_ASKBOT_LOGIN_SYSTEM or 1 %}
     <a href="{{ settings.LOGIN_URL }}?next={{request.path|clean_login_url}}">{% trans %}Hi there! Please sign in{% endtrans %}</a>
 {% endif %}
 {% if request.user.is_authenticated() and request.user.is_administrator() %}

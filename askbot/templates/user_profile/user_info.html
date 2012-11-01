@@ -56,6 +56,12 @@
                     <td><b>{{view_user.real_name}}</b></td>
                 </tr>
                 {% endif %}
+                {% if view_user.company %}
+                <tr>
+                    <td>{% trans %}company{% endtrans %}</td>
+                    <td><b>{{view_user.company}}</b></td>
+                </tr>
+                {% endif %}
                 {% if settings.GROUPS_ENABLED %}
                 <tr>
                     <td>{% if user_groups %}{% trans %}groups{% endtrans %}{% endif %}</td>
