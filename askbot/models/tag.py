@@ -4,7 +4,6 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
 from django.conf import settings
-from django.conf.global_settings import LANGUAGES
 from django.db.models import Q
 from askbot.models.base import BaseQuerySetManager
 from askbot import const
@@ -299,7 +298,7 @@ class Tag(models.Model):
     STATUS_ACCEPTED = 1
 
     name = models.CharField(max_length=255)
-    language = models.CharField(max_length=7, choices=LANGUAGES, blank=True)
+    language = models.CharField(max_length=7, choices=settings.LANGUAGES, blank=True)
     created_by = models.ForeignKey(User, related_name='created_tags')
 
     suggested_by = models.ManyToManyField(

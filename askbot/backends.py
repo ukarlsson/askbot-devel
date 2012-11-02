@@ -65,6 +65,8 @@ class EquaBackend(ModelBackend):
             user.is_staff = False
             user.is_superuser = False
             user.is_active = True
+            user.country = equa_user.country
+            user.language = equa_user.language
             user.company = equa_company.name
             user.save()
 
