@@ -3605,6 +3605,8 @@ def moderate_group_joining(sender, instance=None, created=False, **kwargs):
                 content_object = group
             )
 
+def user_activate_language(sender, request, **kwargs):
+    request.session['language'] = request.user.language
 
 #signal for User model save changes
 django_signals.pre_save.connect(make_admin_if_first_user, sender=User)
@@ -3641,6 +3643,8 @@ signals.post_updated.connect(record_post_update_activity)
 #to tell when the revision becomes publicly visible, not when it is saved
 signals.post_revision_published.connect(notify_author_of_published_revision)
 signals.site_visited.connect(record_user_visit)
+
+signals.user_logged_in.connect(user_activate_language)
 
 __all__ = [
         'signals',
