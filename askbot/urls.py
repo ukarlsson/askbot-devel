@@ -29,10 +29,6 @@ sitemaps = {
 
 APP_PATH = os.path.dirname(__file__)
 urlpatterns = patterns('',
-    url(r'^ida_login/equa_id:(?P<equa_id>\d+)/password:(?P<password>[^/]+)/$',
-        views.auth.ida_login
-    ),
-    url(r'^ida_logout/$', views.auth.ida_logout),
 
     url(r'^$', views.readers.index, name='index'),
     url(

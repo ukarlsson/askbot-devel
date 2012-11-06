@@ -14,13 +14,13 @@ def ida_login(request, equa_id, password):
             return HttpResponseRedirect(reverse('index'))
         else:
             return render_to_response(
-                    'registration/login_ida_failure.html', {
+                    'registration/login_failure.html', {
                         'error' : 'User not active.'
                     }
                 )
     else:
         return render_to_response(
-                'registration/login_ida_failure.html', {
+                'registration/login_failure.html', {
                     'error' : 'Authentication failed.'
                 }
             )
