@@ -72,7 +72,9 @@ var liveSearch = function(query_string) {
             return;
         }
         /** @todo: the questions/ might need translation... */
-        query_string = '/questions/scope:all/sort:activity-desc/page:1/'
+
+        // do not reset the query_string on tag search /uk 
+        // query_string = '/questions/scope:all/sort:activity-desc/page:1/'
         $.each(search_tags, function(idx, tag) {
             query_string = QSutils.add_search_tag(query_string, search_tags);
         });

@@ -24,7 +24,9 @@ def choice_dialog(prompt_phrase, choices = None, invalid_phrase = None):
     assert(hasattr(choices, '__iter__'))
     assert(not isinstance(choices, basestring))
     while 1:
-        response = raw_input('\n%s (type %s): ' % (prompt_phrase, '/'.join(choices)))
+        s = u'\n%s (type %s): ' % (prompt_phrase, '/'.join(choices))
+        s = s.encode('ascii', 'replace')
+        response = raw_input(s)
         if response in choices:
             return response
         elif invalid_phrase != None:

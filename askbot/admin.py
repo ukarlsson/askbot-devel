@@ -14,7 +14,8 @@ class AnonymousQuestionAdmin(admin.ModelAdmin):
     """AnonymousQuestion admin class"""
 
 class TagAdmin(admin.ModelAdmin):
-    list_display = ('name', 'language')
+    list_display = ('name', 'language', 'used_count', 'persistent')
+    list_filter = ('language', 'persistent')
     """Tag admin class"""
 
 class VoteAdmin(admin.ModelAdmin):

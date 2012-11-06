@@ -41,6 +41,10 @@ def parse_tag_ids(input):
     input = input.strip().split(' ')
     return set([int(i) for i in input])
 
+def parse_language_code(input):
+    decoded_input = input.decode(sys.stdin.encoding)
+    return decoded_input.strip()
+
 def get_tag_names(tag_list):
     return set([tag.name for tag in tag_list])
 
@@ -78,6 +82,13 @@ rename_tags, but using tag id's
             default = None,
             help = 'id of the user who will be marked as a performer of this operation'
         ),
+        make_option('--language',
+            action = 'store',
+            type = 'str',
+            dest = 'language',
+            default = None,
+            help = 'language code (e.g., en, sv, de, fi) of tags to process (if not given, process tags that are language independent)'
+        ),
     )
 
     #@transaction.commit_manually
@@ -90,6 +101,11 @@ rename_tags, but using tag id's
         except:
             raise CommandError('Tag IDs must be integer')
 
+        if options['language'] is None:
+            language = ''
+        else:
+            language = parse_language_code(options['language'])
+        
         in_both = from_tag_ids & to_tag_ids
         if in_both:
             tag_str = ', '.join([str(i) for i in in_both])
@@ -102,6 +118,10 @@ rename_tags, but using tag id's
         from_tags = get_tags_by_ids(from_tag_ids)
         to_tags = get_tags_by_ids(to_tag_ids)
         admin = get_admin(options['user_id'])
+
+        for tag in from_tags + to_tags:
+            if tag.language != language:
+                raise CommandError('Tag with ID %s (%s) has language set to %s' % (tag.id, tag.name, tag.language))
 
         questions = models.Thread.objects.all()
         for from_tag in from_tags:

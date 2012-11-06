@@ -36,6 +36,10 @@ def parse_tag_names(input):
     decoded_input = input.decode(sys.stdin.encoding)
     return set(decoded_input.strip().split(' '))
 
+def parse_language_code(input):
+    decoded_input = input.decode(sys.stdin.encoding)
+    return decoded_input.strip()
+
 def format_tag_ids(tag_list):
     return ' '.join([str(tag.id) for tag in tag_list])
 
@@ -81,6 +85,13 @@ ask you to confirm your action before making changes.
             default = None,
             help = 'id of the user who will be marked as a performer of this operation'
         ),
+        make_option('--language',
+            action = 'store',
+            type = 'str',
+            dest = 'language',
+            default = None,
+            help = 'language code (e.g., en, sv, de, fi) of tags to process (if not given, process tags that are language independent)'
+        ),
     )
 
     #@transaction.commit_manually
@@ -100,6 +111,10 @@ ask you to confirm your action before making changes.
             raise CommandError('the --to argument is required')
         from_tag_names = parse_tag_names(options['from'])
         to_tag_names = parse_tag_names(options['to'])
+        if options['language'] is None:
+            language = ''
+        else:
+            language = parse_language_code(options['language'])
 
         in_both = from_tag_names & to_tag_names
         if in_both:
@@ -113,7 +128,7 @@ ask you to confirm your action before making changes.
         from_tags = list()
         try:
             for tag_name in from_tag_names:
-                from_tags.append(models.Tag.objects.get(name = tag_name))
+                from_tags.append(models.Tag.objects.get(name = tag_name, language = language))
         except models.Tag.DoesNotExist:
             error_message = u"""tag %s was not found. It is possible that the tag
 exists but we were not able to match it's unicode value
@@ -124,19 +139,23 @@ Also, you can try command "rename_tag_id"
 """ % tag_name
             raise CommandError(error_message)
         except models.Tag.MultipleObjectsReturned:
-            raise CommandError(u'found more than one tag named %s' % from_tag_name)
+            raise CommandError(u'found more than one tag named %s' % from_tag_names)
 
         admin = get_admin(seed_user_id = options['user_id'])
+
+        persistent = any(tag.persistent for tag in from_tags)
 
         to_tags = list()
         for tag_name in to_tag_names:
             try:
-                to_tags.append(models.Tag.objects.get(name = tag_name))
+                to_tags.append(models.Tag.objects.get(name = tag_name, language = language))
             except models.Tag.DoesNotExist:
                 to_tags.append(
                     models.Tag.objects.create(
                                 name = tag_name,
-                                created_by = admin
+                                created_by = admin,
+                                language = language,
+                                persistent = persistent
                     )
                 )
             except models.Tag.MultipleObjectsReturned:
@@ -144,5 +163,6 @@ Also, you can try command "rename_tag_id"
         options['user_id'] = admin.id
         options['from'] = format_tag_ids(from_tags)
         options['to'] = format_tag_ids(to_tags)
+        options['language'] = language
 
         management.call_command('rename_tags_id', *args, **options)
