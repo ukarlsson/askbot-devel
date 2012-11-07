@@ -1,5 +1,6 @@
 """Custom django signals defined for the askbot forum application.
 """
+
 import django.dispatch
 from django.db.models.signals import pre_save, post_save, pre_delete, post_delete, post_syncdb
 try:
