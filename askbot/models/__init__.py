@@ -2857,6 +2857,11 @@ User.add_to_class(
 User.add_to_class('approve_post_revision', user_approve_post_revision)
 User.add_to_class('notify_users', user_notify_users)
 
+User.add_to_class('company', models.CharField(max_length=100))
+
+User.add_to_class('equa_id', models.IntegerField(default=-1))
+User.add_to_class('is_initialized', models.BooleanField(default=True))
+
 #assertions
 User.add_to_class('assert_can_vote_for_post', user_assert_can_vote_for_post)
 User.add_to_class('assert_can_revoke_old_vote', user_assert_can_revoke_old_vote)
