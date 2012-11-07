@@ -189,10 +189,6 @@ User.add_to_class('new_response_count', models.IntegerField(default=0))
 User.add_to_class('seen_response_count', models.IntegerField(default=0))
 User.add_to_class('consecutive_days_visit_count', models.IntegerField(default = 0))
 
-User.add_to_class('equa_id', models.IntegerField(default=-1))
-
-User.add_to_class('company', models.CharField(max_length=100))
-
 User._meta.get_field('username')._unique = False
 User._meta.get_field('email')._unique = True
 
