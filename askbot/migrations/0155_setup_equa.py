@@ -37,6 +37,8 @@ class Migration(SchemaMigration):
 
         db.add_column('auth_user', 'company', self.gf('django.db.models.fields.CharField')(max_length=100, default='', blank=True), keep_default=False)
 
+        db.add_column('auth_user', 'is_initialized', self.gf('django.db.models.fields.BooleanField')(default=True), keep_default=False)
+
     def backwards(self, orm):
         # Deleting field 'Tag.language'
         db.delete_column(u'tag', 'language')
@@ -58,6 +60,8 @@ class Migration(SchemaMigration):
         db.create_unique('auth_user', 'username')
 
         db.delete_column('auth_user', 'company')
+
+        db.delete_column('auth_user', 'is_initialized')
     models = {
         'askbot.activity': {
             'Meta': {'object_name': 'Activity', 'db_table': "u'activity'"},
