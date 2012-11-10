@@ -58,7 +58,8 @@ def language(request):
     if form.is_valid():
         language = form.cleaned_data['language']
         request.session['language'] = language
-        request.session['django_language'] = language
+        # Do not set django_language until we have improved localization.
+        # request.session['django_language'] = language
 
     next = request.REQUEST.get('next', '/')
     return HttpResponseRedirect(next)

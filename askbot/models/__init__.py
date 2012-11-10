@@ -3608,6 +3608,8 @@ def moderate_group_joining(sender, instance=None, created=False, **kwargs):
 
 def user_activate_language(sender, request, **kwargs):
     request.session['language'] = request.user.language
+    # Do not set django_language until we have improved localization.
+    # request.session['django_language'] = language
 
 #signal for User model save changes
 django_signals.pre_save.connect(make_admin_if_first_user, sender=User)
