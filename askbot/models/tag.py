@@ -248,6 +248,10 @@ class TagManager(BaseQuerySetManager):
         created tag is ``STATUS_ACCEPTED``
         """
 
+        # XXX Do not create suggested tags.
+        if not user.can_create_tags():
+            return list()
+
         #load suggested tags
         pre_suggested_tags = self.filter(
             language = language,
