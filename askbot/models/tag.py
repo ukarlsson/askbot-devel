@@ -250,7 +250,7 @@ class TagManager(BaseQuerySetManager):
 
         #load suggested tags
         pre_suggested_tags = self.filter(
-            Q(language=language) | Q(language=''),
+            language = language,
             name__in = tag_names,
             status = Tag.STATUS_SUGGESTED
         )
